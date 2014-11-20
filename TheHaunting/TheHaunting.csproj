@@ -80,8 +80,15 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\Game.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\createjs-lib.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\createjs.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\easeljs.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\preloadjs.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\soundjs.d.ts" />
+    <TypeScriptCompile Include="Scripts\Lib\tweenjs.d.ts" />
     <TypeScriptCompile Include="Scripts\Objects\World.ts" />
     <TypeScriptCompile Include="Scripts\typings\box2d\box2dweb.d.ts" />
+    <TypeScriptCompile Include="Scripts\Util\AssetManager.ts" />
     <TypeScriptCompile Include="Scripts\Util\Constants.ts" />
   </ItemGroup>
   <PropertyGroup>
