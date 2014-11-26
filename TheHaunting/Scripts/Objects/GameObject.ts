@@ -1,24 +1,25 @@
 ﻿/*******************************************
 Authors: Keith Brewster & Jacqueline Richard
-Class: Room.ts
+Class: GameObject.ts
 Created: 11/22/14
 Last Updated: 11/26/14
-Description: This class handles the creation
-and management of the room class
+Description: This class acts as a game object
+superclass that object classes will extend from
 *******************************************/
 
 module Objects {
-    export class Room extends createjs.Bitmap {
+    export class GameObject extends createjs.Bitmap {
         width: number;
         height: number;
         container: createjs.Container;
 
-        constructor(container:createjs.Container, roomType: string) {
-            super(Util.AssetManager.loader.getResult(roomType));
+        constructor(container: createjs.Container, filePath: string) {
+            super(Util.AssetManager.loader.getResult(filePath));
             this.width = this.getBounds().width;
             this.height = this.getBounds().height;
+            this.regX = this.width * 0.5;
+            this.regY = this.height * 0.5;
             this.container = container;
-            this.container.addChild(this);
         }
     }
 }
