@@ -11,6 +11,7 @@ module Util {
     export class AssetManager {
 
         static loader;
+        static spriteSheet;
 
         //Set up the manifest to load
         static manifest = [{ id: "temp_room", src: "Assets/Images/room_temp.jpg" },

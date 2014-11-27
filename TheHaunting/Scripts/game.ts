@@ -9,7 +9,7 @@
 Authors: Keith Brewster & Jacqueline Richard
 Class: Game.ts
 Created: 11/19/14
-Last Updated: 11/23/14
+Last Updated: 11/26/14
 Description: The class that runs the main
 logic for the game
 *******************************************/
@@ -17,11 +17,17 @@ logic for the game
 //Class level variables
 var stage: createjs.Stage;
 var roomContainer: createjs.Container;
+var gameContainer: createjs.Container;
 var room: Objects.Room;
 var player: Objects.Player;
 
 var keysPressed = {};
 var gameState: number;
+
+(function () {
+    var requestAnimationFrame = window.requestAnimationFrame || window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+})();
 
 /*
 * Preload the necessary assets
@@ -38,7 +44,8 @@ function initGame() {
     stage = new createjs.Stage(document.getElementById("canvas"));
     stage.enableMouseOver();
     createjs.Ticker.setFPS(60);
-    //createjs.Ticker.addEventListener("tick", gameLoop);
+    createjs.Ticker.addEventListener("tick", gameLoop);
+
     roomContainer = new createjs.Container;
     room = new Objects.Room(roomContainer, "temp_room");
     roomContainer.addChild(room);
@@ -62,4 +69,9 @@ function changeState(state) {
         case Constants.END_STATE:
             break;
     }
+}
+
+function gameLoop() {
+    player.update();
+    stage.update();
 }

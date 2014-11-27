@@ -59,6 +59,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CSS\normalize.css" />
+    <Content Include="CSS\styles.css" />
     <Content Include="packages.config" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -78,7 +80,6 @@
   <ItemGroup>
     <Folder Include="Assets\Images\" />
     <Folder Include="Assets\Sounds\" />
-    <Folder Include="CSS\" />
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Scripts\Game.ts" />

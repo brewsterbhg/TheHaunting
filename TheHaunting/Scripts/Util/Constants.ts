@@ -15,7 +15,7 @@ module Constants {
     export var PLAY_STATE: number = 2;
     export var END_STATE: number = 3;
     //Control constants
-    export var MOVE_LEFT: number;
-    export var MOVE_RIGHT: number;
-    export var USE: number;
+    export var MOVE_LEFT: number = 37;
+    export var MOVE_RIGHT: number = 39;
+    export var USE: number = 65;
 }
