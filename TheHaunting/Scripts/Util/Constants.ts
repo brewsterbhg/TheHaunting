@@ -2,7 +2,7 @@
 Authors: Keith Brewster & Jacqueline Richard
 Class: Constants.ts
 Created: 11/19/14
-Last Updated: 11/22/14
+Last Updated: 12/04/14
 Description: The constants used for the game
 *******************************************/
 module Constants {
@@ -18,4 +18,18 @@ module Constants {
     export var MOVE_LEFT: number = 37;
     export var MOVE_RIGHT: number = 39;
     export var USE: number = 65;
+    //Game constants
+    export var LEFT_WALL: number;
+    export var RIGHT_WALL: number;
+    export var FLOOR_ONE: number = 600;
+    export var FLOOR_TWO: number = 450;
+    export var FLOOR_THREE: number = 300;
+    export var FLOOR_FOUR: number = 140;
+    export var LADDER_ONE: number = 85;
+    export var LADDER_TWO: number = 900;
+    export var STAIRS_ONE: number = 220;
+    export var STAIRS_ONE_TOP: number = 300;
+    export var STAIRS_TWO: number = 600;
+    export var STAIRS_TWO_TOP: number = 500;
+    export var MOVE_WIDTH: number = 50;
 }

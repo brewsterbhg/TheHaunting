@@ -8,7 +8,7 @@ superclass that object classes will extend from
 *******************************************/
 
 module Objects {
-    export class GameObject extends createjs.Bitmap {
+    export class GameObject extends createjs.Sprite {
         width: number;
         height: number;
         container: createjs.Container;

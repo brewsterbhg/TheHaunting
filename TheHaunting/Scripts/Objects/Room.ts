@@ -19,6 +19,7 @@ module Objects {
             this.height = this.getBounds().height;
             this.container = container;
             this.container.addChild(this);
+            this.y = -20;
         }
     }
 }
