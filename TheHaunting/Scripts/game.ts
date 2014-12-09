@@ -1,6 +1,5 @@
 ﻿/// <reference path="Util/Constants.ts" />
 /// <reference path="Util/AssetManager.ts" />
-/// <reference path="Objects/World.ts" />
 /// <reference path="Objects/GameObject.ts" />
 /// <reference path="Objects/Player.ts" />
 /// <reference path="Objects/Monster.ts" />
@@ -10,25 +9,31 @@
 Authors: Keith Brewster & Jacqueline Richard
 Class: Game.ts
 Created: 11/19/14
-Last Updated: 12/04/14
+Last Updated: 12/07/14
 Description: The class that runs the main
 logic for the game
 *******************************************/
 
 //Class level variables
 var stage: createjs.Stage;
+var menuContainer: createjs.Container;
 var roomContainer: createjs.Container;
 var gameContainer: createjs.Container;
 var room: Objects.Room;
 var player: Objects.Player;
 var monster: Objects.Monster;
 var currentFloor: number;
-var aButton: createjs.Bitmap;
+var aButtonGreen: createjs.Bitmap;
+var aButtonRed: createjs.Bitmap;
 var onStairs: boolean = false;
+var onObject: boolean = false;
 var path: number;
+var obj: number;
+var playerHiding: boolean = false;
 
 var keysPressed = {};
 var gameState: number;
+var level: number;
 
 /*
 * Preload the necessary assets
@@ -46,13 +51,37 @@ function initGame() {
     stage = new createjs.Stage(document.getElementById("canvas"));
     stage.enableMouseOver();
     createjs.Ticker.setFPS(60);
+    //Set game state
+    changeState(Constants.MENU_STATE);
     //Set ticker
     createjs.Ticker.addEventListener("tick", gameLoop);
     //Add listeners for key press
     window.addEventListener('keydown', keyDown);
     window.addEventListener('keyup', keyUp);
+
+    //Set title screen
+    menuContainer = new createjs.Container;
+    var titleScreen = new createjs.Bitmap(Util.AssetManager.loader.getResult("title"));
+    menuContainer.addChild(titleScreen);
+    //Add play button
+    var playButton = new createjs.Bitmap(Util.AssetManager.loader.getResult("play"));
+    menuContainer.addChild(playButton);
+    playButton.addEventListener("mouseover", mousePointer);
+    playButton.addEventListener("mouseout", mouseDefault);
+    playButton.addEventListener("click", playGame);
+    //Add instructions button
+    var instructionsButton = new createjs.Bitmap(Util.AssetManager.loader.getResult("instructions"));
+    menuContainer.addChild(instructionsButton);
+    instructionsButton.addEventListener("mouseover", mousePointer);
+    playButton.addEventListener("mouseout", mouseDefault);
+    stage.addChild(menuContainer);
+    stage.update();
+}
+
+function playGame() {
     //Set play state and initial floor
-    gameState = Constants.PLAY_STATE;
+    changeState(Constants.PLAY_STATE);
+    level = Constants.LEVEL_ONE;
     currentFloor = Constants.FLOOR_THREE;
 
     //The container that holds the game sprites
@@ -67,14 +96,18 @@ function initGame() {
     monster = new Objects.Monster(roomContainer);
     roomContainer.addChild(monster);
     monster.x = 500;
-    monster.y = 520;
+    monster.y = Constants.FLOOR_ONE;
     stage.addChild(roomContainer);
 
     //The action button that shows when you're near a usable object
-    aButton = new createjs.Bitmap(Util.AssetManager.loader.getResult("aButton"));
-    stage.addChild(aButton);
+    aButtonGreen = new createjs.Bitmap(Util.AssetManager.loader.getResult("aButton_g"));
+    stage.addChild(aButtonGreen);
     //Set to false initially
-    aButton.visible = false;
+    aButtonGreen.visible = false;
+    aButtonRed = new createjs.Bitmap(Util.AssetManager.loader.getResult("aButton_r"));
+    stage.addChild(aButtonRed);
+    //Set to false initially
+    aButtonRed.visible = false;
 }
 
 /*
@@ -84,15 +117,34 @@ function initGame() {
 * constants class)
 */
 function checkCollisions() {
+    //Wall collisions
+    if (player.x <= Constants.LEFT_WALL) {
+        player.x = Constants.LEFT_WALL;
+    }
+    if (player.x >= Constants.RIGHT_WALL) {
+        player.x = Constants.RIGHT_WALL;
+    }
     if (currentFloor == Constants.FLOOR_ONE) {
         //Bottom of staircase one
         if (player.x > Constants.STAIRS_ONE && player.x < Constants.STAIRS_ONE + Constants.MOVE_WIDTH) {
             onStairs = true;
             path = 1;
         }
+        //First floor cupboard
+        else if (player.x > Constants.CUPBOARD_FLOOR_ONE && player.x < Constants.CUPBOARD_FLOOR_ONE + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 1;
+        }
+        //First floor refridgerator
+        else if (player.x > Constants.FRIDGE_FLOOR_ONE && player.x < Constants.FRIDGE_FLOOR_ONE + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 2;
+        }
         else {
             onStairs = false;
+            onObject = false;
             path = 0;
+            obj = 0;
         }
     }
     else if (currentFloor == Constants.FLOOR_TWO) {
@@ -106,8 +158,19 @@ function checkCollisions() {
             onStairs = true;
             path = 3;
         }
+        //Second floor shower
+        else if (player.x > Constants.SHOWER_FLOOR_TWO && player.x < Constants.SHOWER_FLOOR_TWO + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 3;
+        }
+        //Second floor cupboard
+        else if (player.x > Constants.CUPBOARD_FLOOR_TWO && player.x < Constants.CUPBOARD_FLOOR_TWO + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 4;
+        }
         else {
             onStairs = false;
+            onObject = false;
             path = 0;
         }
     }
@@ -127,9 +190,21 @@ function checkCollisions() {
             onStairs = true;
             path = 6;
         }
+        //Third floor bathtub
+        else if (player.x > Constants.TUB_FLOOR_THREE && player.x < Constants.TUB_FLOOR_THREE + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 5;
+        }
+        //Third floor bed
+        else if (player.x > Constants.BED_FLOOR_THREE && player.x < Constants.BED_FLOOR_THREE + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 6;
+        }
         else {
             onStairs = false;
+            onObject = false;
             path = 0;
+            obj = 0;
         }
     }
     else if (currentFloor == Constants.FLOOR_FOUR) {
@@ -143,9 +218,27 @@ function checkCollisions() {
             onStairs = true;
             path = 8;
         }
+        //Fourth floor cupboard
+        else if (player.x > Constants.BED_FLOOR_FOUR && player.x < Constants.BED_FLOOR_FOUR + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 7;
+        }
+        //Fourth floor bed
+        else if (player.x > Constants.CUPBOARD_FLOOR_FOUR && player.x < Constants.BED_FLOOR_FOUR + Constants.MOVE_WIDTH) {
+            onObject = true;
+            obj = 8;
+        }
         else {
             onStairs = false;
+            onObject = false;
             path = 0;
+            obj = 0;
+        }
+    }
+    //Check monster collision
+    if (monster.x > player.x - 5 && monster.x < player.x + 5) {
+        if (monster.y == player.y) {
+
         }
     }
 }
@@ -208,6 +301,31 @@ function keyDown(event) {
                 player.currentFloor = currentFloor;
             }
         }
+        //If the flag onObject is true (the user is in front of an object)
+        else if (onObject && Constants.USE in keysPressed) {
+            if (obj != 0) {
+                if (!playerHiding) {
+                    player.visible = false;
+                    //Set player hiding flag
+                    playerHiding = true;
+                    if (clock == null) {
+                        var clock = new createjs.Sprite(Util.AssetManager.clockSpriteSheet);
+                        stage.addChild(clock);
+                    }
+                    clock.x = player.x;
+                    clock.y = player.y;
+                    clock.gotoAndPlay("tick");
+                    if (clock.currentFrame == 9) {
+                        player.visible = true;
+                        playerHiding = false;
+                    }
+                }
+                else if (playerHiding) {
+                    player.visible = true;
+                    playerHiding = false;
+                }
+            }
+        }
     }
 }
 
@@ -266,20 +384,58 @@ function changeState(state) {
 }
 
 /*
-* The main game loop. Update all objects, and check player collisions
+* Checks the flag if a player is standing next to a usable object
+* Show green use button if a travel path, red for a furnishing
 */
-function gameLoop() {
-    player.update();
-    stage.update();
-    checkCollisions();
+function checkActionButtons() {
     if (onStairs) {
-        //Display the use button
-        aButton.visible = true;
-        aButton.x = player.x + 20;
-        aButton.y = player.y - 90;
+        //Display the green use button
+        aButtonGreen.visible = true;
+        aButtonGreen.x = player.x + 20;
+        aButtonGreen.y = player.y - 90;
     }
     if (!onStairs) {
         //Hide the use button
-        aButton.visible = false;
+        aButtonGreen.visible = false;
     }
+    if (onObject) {
+        //Display the red use button
+        aButtonRed.visible = true;
+        aButtonRed.x = player.x;
+        aButtonRed.y = player.y - 90;
+    }
+    if (!onObject) {
+        //Hide the use button
+        aButtonRed.visible = false;
+    }
+}
+
+/*
+* The main game loop. Update all objects, and check player collisions
+*/
+function gameLoop() {
+    if (gameState == Constants.PLAY_STATE) {
+        //Updates
+        if (!playerHiding) {
+            player.update();
+        }
+        monster.update(player.x, currentFloor, playerHiding);
+        stage.update();
+        checkCollisions();
+        checkActionButtons();
+    }
+    if (level != Constants.LEVEL_ONE) {
+        //During level 2 and level 3
+
+    }
+}
+
+//Changing the cursor to pointer for hoverable objects
+function mousePointer(e) {
+    document.body.style.cursor = 'pointer';
+}
+
+//Changing the cursor back to default on mouse out
+function mouseDefault(e) {
+    document.body.style.cursor = 'default';
 }

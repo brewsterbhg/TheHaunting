@@ -1,5 +1,4 @@
 ﻿/// <reference path="../Util/Constants.ts" />
-
 /*******************************************
 Authors: Keith Brewster & Jacqueline Richard
 Class: World.ts
@@ -8,8 +7,8 @@ Last Updated: 11/19/14
 Description: The class defining the physics
 for the game
 *******************************************/
-module Objects {
-
+var Objects;
+(function (Objects) {
     //Create a new physics world
     var world = new Box2D.Dynamics.b2World(new Box2D.Common.Math.b2Vec2(0, 10), true);
 
@@ -29,7 +28,7 @@ module Objects {
     world.CreateBody(bodyDef).CreateFixture(groundDef);
 
     //Set the debug draw
-    var canvas = <HTMLCanvasElement>document.getElementById("canvas");
+    var canvas = document.getElementById("canvas");
     var debugDraw = new Box2D.Dynamics.b2DebugDraw();
     debugDraw.SetSprite(canvas.getContext("2d"));
     debugDraw.SetDrawScale(Constants.SCALE);
@@ -37,5 +36,5 @@ module Objects {
     debugDraw.SetLineThickness(1.0);
     debugDraw.SetFlags(Box2D.Dynamics.b2DebugDraw.e_shapeBit | Box2D.Dynamics.b2DebugDraw.e_jointBit);
     world.SetDebugDraw(debugDraw);
-
-}
+})(Objects || (Objects = {}));
+//# sourceMappingURL=World.js.map

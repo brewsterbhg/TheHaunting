@@ -93,7 +93,6 @@
     <TypeScriptCompile Include="Scripts\Objects\Monster.ts" />
     <TypeScriptCompile Include="Scripts\Objects\Player.ts" />
     <TypeScriptCompile Include="Scripts\Objects\Room.ts" />
-    <TypeScriptCompile Include="Scripts\Objects\World.ts" />
     <TypeScriptCompile Include="Scripts\typings\box2d\box2dweb.d.ts" />
     <TypeScriptCompile Include="Scripts\Util\AssetManager.ts" />
     <TypeScriptCompile Include="Scripts\Util\Constants.ts" />
