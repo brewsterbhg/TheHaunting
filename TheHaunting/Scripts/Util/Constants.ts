@@ -45,4 +45,7 @@ module Constants {
     export var SHOWER_FLOOR_TWO: number = 55;
     export var CUPBOARD_FLOOR_ONE: number = 130;
     export var FRIDGE_FLOOR_ONE: number = 890;
+    //Font constants
+    export var GAME_FONT: string = "bold 14px Verdana"
+    export var GAME_COLOUR: string = "#FFFFFF";
 }

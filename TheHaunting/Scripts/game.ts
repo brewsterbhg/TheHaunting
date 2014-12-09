@@ -3,6 +3,7 @@
 /// <reference path="Objects/GameObject.ts" />
 /// <reference path="Objects/Player.ts" />
 /// <reference path="Objects/Monster.ts" />
+/// <reference path="Objects/Clock.ts" />
 /// <reference path="Objects/Room.ts" />
 
 /*******************************************
@@ -18,10 +19,13 @@ logic for the game
 var stage: createjs.Stage;
 var menuContainer: createjs.Container;
 var roomContainer: createjs.Container;
-var gameContainer: createjs.Container;
+var shadowContainer: createjs.Container;
 var room: Objects.Room;
 var player: Objects.Player;
+var clock: Objects.Clock;
 var monster: Objects.Monster;
+var monster2: Objects.Monster;
+
 var currentFloor: number;
 var aButtonGreen: createjs.Bitmap;
 var aButtonRed: createjs.Bitmap;
@@ -30,10 +34,13 @@ var onObject: boolean = false;
 var path: number;
 var obj: number;
 var playerHiding: boolean = false;
-
 var keysPressed = {};
 var gameState: number;
 var level: number;
+var timer: number = 5;
+var debuffClock;
+var timeLeftOnDebuff: createjs.Text;
+var debuff: boolean = false;
 
 /*
 * Preload the necessary assets
@@ -81,7 +88,7 @@ function initGame() {
 function playGame() {
     //Set play state and initial floor
     changeState(Constants.PLAY_STATE);
-    level = Constants.LEVEL_ONE;
+    level = Constants.LEVEL_TWO;
     currentFloor = Constants.FLOOR_THREE;
 
     //The container that holds the game sprites
@@ -96,7 +103,6 @@ function playGame() {
     monster = new Objects.Monster(roomContainer);
     roomContainer.addChild(monster);
     monster.x = 500;
-    monster.y = Constants.FLOOR_ONE;
     stage.addChild(roomContainer);
 
     //The action button that shows when you're near a usable object
@@ -108,6 +114,32 @@ function playGame() {
     stage.addChild(aButtonRed);
     //Set to false initially
     aButtonRed.visible = false;
+
+    //Add shadow container
+    shadowContainer = new createjs.Container;
+    var shadowOne = new createjs.Shape();
+    shadowOne.graphics.beginFill("#000000");
+    shadowOne.graphics.drawRect(0, 50, Constants.STAGE_WIDTH, 150);
+    shadowContainer.addChild(shadowOne);
+    var shadowTwo = new createjs.Shape();
+    shadowTwo.graphics.beginFill("#000000");
+    shadowTwo.graphics.drawRect(0, 200, Constants.STAGE_WIDTH, 150);
+    shadowContainer.addChild(shadowTwo);
+    var shadowThree = new createjs.Shape();
+    shadowThree.graphics.beginFill("#000000");
+    shadowThree.graphics.drawRect(0, 350, Constants.STAGE_WIDTH, 150);
+    shadowContainer.addChild(shadowThree);
+    var shadowFour = new createjs.Shape();
+    shadowFour.graphics.beginFill("#000000");
+    shadowFour.graphics.drawRect(0, 500, Constants.STAGE_WIDTH, 150);
+    shadowContainer.addChild(shadowFour);
+    shadowOne.alpha = 0.9;
+    shadowTwo.alpha = 0.9;
+    shadowThree.alpha = 0.9;
+    shadowFour.alpha = 0.9;
+    stage.addChild(shadowContainer);
+    shadowContainer.visible = false;
+    shadowContainer.getChildAt(1).visible = false;
 }
 
 /*
@@ -238,7 +270,7 @@ function checkCollisions() {
     //Check monster collision
     if (monster.x > player.x - 5 && monster.x < player.x + 5) {
         if (monster.y == player.y) {
-
+            monster.attack();
         }
     }
 }
@@ -255,75 +287,88 @@ function keyDown(event) {
         //If the flag onStairs is true (the user is on a travel path)
         if (onStairs && Constants.USE in keysPressed) {
             if (path != 0) {
+                var switchFloor: number = 1;
+                var floorAsNum: number;
                 switch (path) {
                     case 1:
                         //First floor to second floor
                         player.x = Constants.STAIRS_ONE_TOP;
                         currentFloor = Constants.FLOOR_TWO;
+                        floorAsNum = 2;
                         break;
                     case 2:
                         //Second floor to third floor
                         player.x = Constants.STAIRS_TWO_TOP;
                         currentFloor = Constants.FLOOR_THREE;
+                        floorAsNum = 1;
                         break;
                     case 3:
                         //Second floor to first floor
                         player.x = Constants.STAIRS_ONE;
                         currentFloor = Constants.FLOOR_ONE;
+                        floorAsNum = 3;
                         break;
                     case 4:
                         //Third floor to fourth floor (ladder one)
                         player.x = Constants.LADDER_ONE;
                         currentFloor = Constants.FLOOR_FOUR;
+                        floorAsNum = 0;
                         break;
                     case 5:
                         //Third floor to fourth floor (ladder two)
                         player.x = Constants.LADDER_TWO;
                         currentFloor = Constants.FLOOR_FOUR;
+                        floorAsNum = 0;
                         break;
                     case 6:
                         //Third floor to second floor
                         player.x = Constants.STAIRS_TWO;
                         currentFloor = Constants.FLOOR_TWO;
+                        floorAsNum = 2;
                         break;
                     case 7:
                         //Fourth four to third floor (ladder one)
                         player.x = Constants.LADDER_ONE;
                         currentFloor = Constants.FLOOR_THREE;
+                        floorAsNum = 1;
                         break;
                     case 8:
                         //Fourth floor to third floor (ladder two)
                         player.x = Constants.LADDER_TWO;
                         currentFloor = Constants.FLOOR_THREE;
+                        floorAsNum = 1;
                         break;
                 }
                 //Set the new player y-position
                 player.currentFloor = currentFloor;
+                shadowContainer.getChildAt(0).visible = true;
+                shadowContainer.getChildAt(1).visible = true;
+                shadowContainer.getChildAt(2).visible = true;
+                shadowContainer.getChildAt(3).visible = true;
+                shadowContainer.getChildAt(floorAsNum).visible = false;
             }
         }
         //If the flag onObject is true (the user is in front of an object)
         else if (onObject && Constants.USE in keysPressed) {
-            if (obj != 0) {
-                if (!playerHiding) {
-                    player.visible = false;
-                    //Set player hiding flag
-                    playerHiding = true;
-                    if (clock == null) {
-                        var clock = new createjs.Sprite(Util.AssetManager.clockSpriteSheet);
-                        stage.addChild(clock);
-                    }
+            if (obj != 0 && !playerHiding && !debuff) {
+                debuff = true;
+                //Set player hiding flag
+                playerHiding = true;
+                player.visible = false;
+                //Check to make sure there's no clock on the screen
+                if (roomContainer.getChildByName("clock") == null) {
+                    //Add a new clock, and listen for when it finishes it's animation
+                    clock = new Objects.Clock(roomContainer);
+                    roomContainer.addChild(clock);
                     clock.x = player.x;
                     clock.y = player.y;
-                    clock.gotoAndPlay("tick");
-                    if (clock.currentFrame == 9) {
-                        player.visible = true;
-                        playerHiding = false;
-                    }
+                    clock.name = "clock";
+                    clock.addEventListener("timeup", unhideHero);
                 }
-                else if (playerHiding) {
-                    player.visible = true;
-                    playerHiding = false;
-                }
+            }
+            //If player is hiding, unhide them and remove the clock
+            else if (obj!=0 && playerHiding) {
+                unhideHero();
             }
         }
     }
@@ -336,35 +381,29 @@ function keyUp(event) {
     delete keysPressed[event.keyCode];
 }
 
-/**
-* This function takes two points, and calculates the distance
+/*
+* When the clock timer ends, unhide the hero
+*/
+function unhideHero() {
+    player.visible = true;
+    playerHiding = false;
+    roomContainer.removeChild(clock);
+    debuffClock = setInterval(debuffTimer, 1000);
+    if (stage.getChildByName("timeleft") == null) {
+        //Show player how long they have to wait
+        timeLeftOnDebuff = new createjs.Text(timer.toString(), Constants.GAME_FONT, Constants.GAME_COLOUR);
+        stage.addChild(timeLeftOnDebuff);
+        timeLeftOnDebuff.x = player.x - 50;
+        timeLeftOnDebuff.y = player.y - 100;
+        timeLeftOnDebuff.name = "timeleft";
+    }
+}
+
+/*
 *
-**/
-function distance(point1: createjs.Point, point2: createjs.Point): number {
-    //Get points
-    var p1: createjs.Point;
-    var p2: createjs.Point;
-    var itemX: number;
-    var itemY: number;
-    var result: number;
-
-    p1 = new createjs.Point();
-    p2 = new createjs.Point();
-
-    p1.x = point1.x;
-    p1.y = point1.y;
-    p2.x = point2.x;
-    p2.y = point2.y;
-
-    itemX = p2.x - p1.x;
-    itemY = p2.y - p1.y;
-
-    itemX = itemX * itemX;
-    itemY = itemY * itemY;
-
-    //Return the distance result
-    result = Math.sqrt(itemX + itemY);
-    return result;
+*/
+function debuffTimer() {
+    timer--;
 }
 
 /*
@@ -410,6 +449,24 @@ function checkActionButtons() {
     }
 }
 
+function checkTimer() {
+    if (timer == 0) {
+        stage.removeChild(timeLeftOnDebuff);
+        timer = 5;
+        debuff = false;
+        clearInterval(debuffClock);
+    }
+    if (stage.getChildByName("timeleft") != null) {
+        stage.removeChild(timeLeftOnDebuff);
+        //Show player how long they have to wait
+        timeLeftOnDebuff = new createjs.Text(timer.toString(), Constants.GAME_FONT, Constants.GAME_COLOUR);
+        stage.addChild(timeLeftOnDebuff);
+        timeLeftOnDebuff.x = player.x - 20;
+        timeLeftOnDebuff.y = player.y - 80;
+        timeLeftOnDebuff.name = "timeleft";
+    }
+}
+
 /*
 * The main game loop. Update all objects, and check player collisions
 */
@@ -423,10 +480,18 @@ function gameLoop() {
         stage.update();
         checkCollisions();
         checkActionButtons();
+        checkTimer();
     }
     if (level != Constants.LEVEL_ONE) {
         //During level 2 and level 3
-
+        shadowContainer.visible = true;
+    }
+    if (level == Constants.LEVEL_THREE) {
+        //Level 3
+        monster2 = new Objects.Monster(roomContainer);
+        roomContainer.addChild(monster2);
+        monster2.x = 100;
+        monster2.update(player.x, currentFloor, playerHiding);
     }
 }
 

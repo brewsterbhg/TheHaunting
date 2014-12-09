@@ -14,18 +14,20 @@ module Objects {
         container: createjs.Container;
         playerX: number;
         playerFloor: number;
-        monsterFloor: number = Constants.FLOOR_ONE;
+        monsterFloor: number;
         speed: number = 3;
         ladderToUse: number;
         playerHiding: boolean;
         pickRandom: boolean = false;
         dir: number = -1;
+        attacking: boolean = false;
         constructor(container: createjs.Container) {
             super(Util.AssetManager.torsoSpriteSheet);
             this.regX = this.getBounds().width * 0.5;
             this.regY = this.getBounds().height * 0.5;
             this.container = container;
             this.container.addChild(this);
+            this.monsterFloor = Constants.FLOOR_ONE;
             this.gotoAndPlay("idle");
         }
 
@@ -91,11 +93,11 @@ module Objects {
                             this.monsterFloor = Constants.FLOOR_THREE;
                         }
                         else if (this.ladderToUse == 1 && this.x < Constants.LADDER_TWO) {
-                            this.x += this.speed * 2;
+                            this.x += this.speed;
                             this.scaleX = -1;
                         }
                         else if (this.ladderToUse == 0 && this.x > Constants.LADDER_ONE) {
-                            this.x -= this.speed * 2;
+                            this.x -= this.speed;
                             this.scaleX = 1;
                         }
                     }
@@ -191,6 +193,13 @@ module Objects {
                             }
                     }
                 }
+            }
+        }
+
+        attack() {
+            if (!this.attacking) {
+                this.attacking = true;
+                this.gotoAndPlay("attack");
             }
         }
 
