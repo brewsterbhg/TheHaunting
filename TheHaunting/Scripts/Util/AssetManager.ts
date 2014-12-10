@@ -14,6 +14,7 @@ module Util {
         static girlSpriteSheet;
         static torsoSpriteSheet;
         static clockSpriteSheet;
+        static cubeSpriteSheet;
 
         static girlData = {
             "images": ["Assets/Images/girl.png"],
@@ -107,13 +108,37 @@ module Util {
             },
         }
 
+        static cubeData = {
+            "images": ["Assets/Images/c.png"],
+            "frames": [
+
+                [2, 2, 33, 27],
+                [37, 2, 33, 27],
+                [72, 2, 33, 27],
+                [72, 2, 33, 27],
+                [37, 2, 33, 27],
+                [2, 2, 33, 27]
+            ],
+            "animations": {
+
+                "idle": {
+                    frames: [0, 1, 2, 3, 4, 5],
+                    speed: 0.15
+                }
+            },
+        }
+
         //Set up the manifest to load
         static manifest = [{ id: "house", src: "Assets/Images/house.png" },
             { id: "aButton_g", src: "Assets/Images/aGreen.png" },
-            { id: "aButton_r", src: "Assets/Images/aRed.png" },
+            { id: "aButton_r", src: "Assets/Images/ARed.png" },
             { id: "title", src: "Assets/Images/title_screen.png" },
             { id: "play", src: "Assets/Images/play_button.png" },
-            { id: "instructions", src: "Assets/Images/instructions_button.png" }];
+            { id: "instructions", src: "Assets/Images/instructions_button.png" },
+            { id: "gameover", src: "Assets/Images/game-over.png" },
+            { id: "win", src: "Assets/Images/congrats.png" },
+            { id: "theme", src: "Assets/Sounds/maintheme.mp3" },
+            { id: "horror", src: "Assets/Sounds/horror.mp3" }];
 
         //On initial game load
         static init() {
@@ -123,6 +148,7 @@ module Util {
             this.girlSpriteSheet = new createjs.SpriteSheet(this.girlData);
             this.torsoSpriteSheet = new createjs.SpriteSheet(this.torsoData);
             this.clockSpriteSheet = new createjs.SpriteSheet(this.clockData);
+            this.cubeSpriteSheet = new createjs.SpriteSheet(this.cubeData);
         }
     }
 }

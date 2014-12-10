@@ -3,6 +3,7 @@
 /// <reference path="Objects/GameObject.ts" />
 /// <reference path="Objects/Player.ts" />
 /// <reference path="Objects/Monster.ts" />
+/// <reference path="Objects/Cube.ts" />
 /// <reference path="Objects/Clock.ts" />
 /// <reference path="Objects/Room.ts" />
 /*******************************************
@@ -23,6 +24,7 @@ var player;
 var clock;
 var monster;
 var monster2;
+var cube;
 
 var currentFloor;
 var aButtonGreen;
@@ -39,6 +41,9 @@ var timer = 5;
 var debuffClock;
 var timeLeftOnDebuff;
 var debuff = false;
+var gameTick;
+var gameTime = 120;
+var gameTimeValue;
 
 /*
 * Preload the necessary assets
@@ -85,10 +90,14 @@ function initGame() {
     instructionsButton.addEventListener("mouseover", mousePointer);
     playButton.addEventListener("mouseout", mouseDefault);
     stage.addChild(menuContainer);
+    createjs.Sound.play("theme", "none", 0, 0, -1);
     stage.update();
 }
 
 function playGame() {
+    createjs.Sound.stop();
+    createjs.Sound.play("horror", "none", 0, 0, -1);
+
     //Set play state and initial floor
     changeState(Constants.PLAY_STATE);
     level = Constants.LEVEL_TWO;
@@ -121,6 +130,11 @@ function playGame() {
 
     //Set to false initially
     aButtonRed.visible = false;
+
+    //Set game timer
+    gameTimeValue = new createjs.Text("Time Remaining: " + gameTime.toString(), Constants.GAME_FONT, Constants.GAME_COLOUR);
+    stage.addChild(gameTimeValue);
+    var gameClock = setInterval(gameTimer, 1000);
 
     //Add shadow container
     shadowContainer = new createjs.Container;
@@ -248,6 +262,13 @@ function checkCollisions() {
     if (monster.x > player.x - 5 && monster.x < player.x + 5) {
         if (monster.y == player.y) {
             monster.attack();
+        }
+    }
+
+    //Check cube collision
+    if (roomContainer.getChildByName("cube") != null) {
+        if (player.x > cube.x - 3 && player.x < cube.x + 3 && currentFloor == cube.y) {
+            roomContainer.removeChild(cube);
         }
     }
 }
@@ -384,6 +405,16 @@ function debuffTimer() {
 }
 
 /*
+*
+*/
+function gameTimer() {
+    gameTime--;
+    stage.removeChild(gameTimeValue);
+    gameTimeValue = new createjs.Text("Time Remaining: " + gameTime.toString(), Constants.GAME_FONT, Constants.GAME_COLOUR);
+    stage.addChild(gameTimeValue);
+}
+
+/*
 * Change the current game state
 * @param state : the new state to switch to
 */
@@ -396,6 +427,42 @@ function changeState(state) {
             break;
         case Constants.END_STATE:
             break;
+    }
+}
+
+/*
+* Creates a cube object (collect for score) and randomly places it in the house
+*/
+function createCube() {
+    if (roomContainer.getChildByName("cube") == null) {
+        cube = new Objects.Cube(roomContainer);
+        roomContainer.addChild(cube);
+        cube.name = "cube";
+
+        //Randomize the x position
+        cube.x = Math.floor(Math.random() * Constants.STAGE_WIDTH);
+        if (cube.x > Constants.RIGHT_WALL) {
+            cube.x - Constants.RIGHT_WALL;
+        }
+        if (cube.x < Constants.LEFT_WALL) {
+            cube.x + Constants.LEFT_WALL;
+        }
+        var floor = Math.floor(Math.random() * 4) + 1;
+
+        switch (floor) {
+            case 1:
+                cube.y = Constants.FLOOR_ONE;
+                break;
+            case 2:
+                cube.y = Constants.FLOOR_TWO;
+                break;
+            case 3:
+                cube.y = Constants.FLOOR_THREE;
+                break;
+            case 4:
+                cube.y = Constants.FLOOR_FOUR;
+                break;
+        }
     }
 }
 
@@ -443,6 +510,11 @@ function checkTimer() {
         timeLeftOnDebuff.y = player.y - 80;
         timeLeftOnDebuff.name = "timeleft";
     }
+    if (gameTime == 0) {
+    }
+    if (gameTime % 5 == 0) {
+        createCube();
+    }
 }
 
 /*
@@ -459,10 +531,11 @@ function gameLoop() {
         checkCollisions();
         checkActionButtons();
         checkTimer();
-    }
-    if (level != Constants.LEVEL_ONE) {
+
         //During level 2 and level 3
-        shadowContainer.visible = true;
+        if (level != Constants.LEVEL_ONE) {
+            shadowContainer.visible = true;
+        }
     }
     if (level == Constants.LEVEL_THREE) {
         //Level 3

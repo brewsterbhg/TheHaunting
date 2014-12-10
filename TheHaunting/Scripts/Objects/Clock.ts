@@ -1,6 +1,6 @@
 ﻿/*******************************************
 Authors: Keith Brewster & Jacqueline Richard
-Class: Player.ts
+Class: Clock.ts
 Created: 12/09/14
 Last Updated: 12/09/14
 Description: This class handles the creation

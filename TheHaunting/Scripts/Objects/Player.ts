@@ -30,7 +30,6 @@ module Objects {
             this.controls();
             this.dir = 0;
             this.container = container;
-            this.gotoAndPlay("idle");
             this.container.addChild(this);
         }
 
@@ -67,9 +66,6 @@ module Objects {
                     this.dir = 0;
                     this.velocity = 0;
                 }
-            }
-            if (this.velocity == 0) {
-                this.stop();
             }
         }
 
@@ -120,7 +116,7 @@ module Objects {
                 this.scaleX = -1;
                 this.gotoAndPlay("walk");
             }
-            if (this.velocity == 0) {
+            if (this.dir == 0) {
                 this.gotoAndPlay("idle");
             }
         }

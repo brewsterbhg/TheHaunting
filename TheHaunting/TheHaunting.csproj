@@ -90,6 +90,7 @@
     <TypeScriptCompile Include="Scripts\Lib\soundjs.d.ts" />
     <TypeScriptCompile Include="Scripts\Lib\tweenjs.d.ts" />
     <TypeScriptCompile Include="Scripts\Objects\Clock.ts" />
+    <TypeScriptCompile Include="Scripts\Objects\Cube.ts" />
     <TypeScriptCompile Include="Scripts\Objects\GameObject.ts" />
     <TypeScriptCompile Include="Scripts\Objects\Monster.ts" />
     <TypeScriptCompile Include="Scripts\Objects\Player.ts" />
